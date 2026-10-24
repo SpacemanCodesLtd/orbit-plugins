@@ -1,49 +1,49 @@
-# Orbit Browser terms of use — draft for approval
+# Orbit Browser terms — publication candidate
 
-**Unpublished draft.** Publisher review is required before this text becomes a public policy or is supplied as accepted terms. Confirm your registered company number, registered office, effective date, distribution rights and the relationship to any existing Orbit licence terms. This draft does not cover a paid Orbit purchase or replace the terms needed for that transaction.
+**Prepared for review; not yet published.** Website source and publication review: https://github.com/captenmasin/orbit-marketing/pull/1. The owner confirmed inbox-only support, 12-month retention after resolution, and company-number/registry-link disclosure without publishing a postal address. The receiving mailbox provider and relevant transfer arrangements still need confirmation. Statutory address-disclosure completeness has not been established.
 
-## Publisher and contact
+Last updated: 24 October 2026.
 
-Orbit Browser is provided by SpacemanCodes LTD. Contact support@orbitdesktop.com or visit https://orbitdesktop.com/contact/ for help or questions about these terms.
+These terms apply to Orbit Browser, the optional integration that connects Codex to supported content in your local Orbit workspace. Orbit application purchases, subscriptions and your use of Codex or another AI host are covered by their separate applicable terms.
 
-**Complete before publication:** registered company number, registered office and effective date. Do not publish this paragraph with missing details.
+## Who provides Orbit Browser
 
-## What Orbit Browser does
+Orbit Browser is provided by SpacemanCodes LTD, company number **12193639**. You can check the company's details on the <a href="https://find-and-update.company-information.service.gov.uk/company/12193639" target="_blank" rel="noopener noreferrer">Companies House register</a>.
 
-Orbit Browser connects Codex to supported content in your local Orbit workspace. It lets you browse projects, tasks, documents, scratchpad notes, links and saved dependency findings, and start a new chat with selected content.
+For support or questions about these terms, email [support@orbitdesktop.com](mailto:support@orbitdesktop.com) or visit [Contact Orbit](https://orbitdesktop.com/contact/).
 
-The plugin requires a supported Mac, an installed compatible Orbit application and a compatible local Codex chat. Orbit and Codex are supplied separately under their applicable terms. Installing this plugin does not supply a separate Orbit application licence or an OpenAI account.
+## What the integration does
 
-The plugin is read-only. It does not edit your workspace, retrieve vault secrets, run dependency checks, update packages, process payments or start subscriptions. Saved findings may be incomplete or out of date; check their dates and refresh them in Orbit before relying on them.
+Orbit Browser lets you browse projects, tasks, documents, scratchpad notes, saved links and saved dependency findings. You can preview an item and choose **Start new chat** to send a readable brief into a new Codex conversation.
 
-## Permission to use the plugin
+It requires a supported Mac, a compatible installed copy of Orbit and a compatible local Codex chat. Installing Orbit Browser does not supply the Orbit application, a separate application licence or an OpenAI account.
 
-Subject to these terms and applicable law, SpacemanCodes LTD permits you to install and use the plugin for your own authorised work. You must have permission to access the workspace and to share its content with the AI host you choose.
+The integration is read-only. It cannot edit your workspace, retrieve Orbit vault secrets or connection credentials, run dependency checks, update packages, process payments or start subscriptions. Dependency findings are saved results; they can be incomplete or out of date. Check their dates and refresh them in Orbit before relying on them.
 
-You retain your rights in your project content. These terms do not transfer ownership of that content to SpacemanCodes LTD. Orbit Browser's software, name and visual assets remain subject to their owners' intellectual property rights. Third-party components remain subject to their own licences. This permission does not add an open-source licence to the repository or grant rights to separately supplied software.
+## Permission to use Orbit Browser
 
-Do not use the plugin unlawfully, infringe others' rights, obtain unauthorised access or interfere with another person's systems. Do not attempt to use ordinary notes as a route to expose credentials or information you are not entitled to share.
+Subject to these terms and applicable law, SpacemanCodes LTD permits you to install and use Orbit Browser for your authorised work. You must have permission to access the workspace and share its content with your chosen AI host.
+
+You retain your rights in your project content. These terms do not transfer ownership of it to SpacemanCodes LTD. The integration's software, name and visual assets remain subject to their owners' intellectual property rights. Third-party components retain their own licences. This permission does not grant rights to separately supplied software or add an open-source licence to the source repository.
+
+Do not use the integration unlawfully, infringe other people's rights, obtain unauthorised access or interfere with someone else's systems.
 
 ## Local access and AI sharing
 
-Connecting enables Codex to request supported workspace content through local tools. Browsing loads project content through the host; selecting an item also supplies model context. Starting a new chat sends the selected brief into a new conversation. The host's own terms, privacy settings and retention policies govern its processing.
+Connecting allows Codex to request supported project content through local tools. Browsing loads content through the host, and selecting an item also supplies model context. **Start new chat** sends the selected brief into a fresh conversation. Local execution does not mean the host's processing stays on your Mac.
 
-Read the published Orbit Browser privacy notice before connecting. Keep credentials in appropriate secret storage and review material before sharing. AI output may be inaccurate; review it before taking actions or changing your projects.
+Your AI host's terms, privacy settings and retention policies govern its processing. Read [Orbit privacy](https://orbitdesktop.com/privacy/#orbit-browser-for-codex) before connecting, keep credentials in appropriate secret storage and review material before sharing it.
 
-## Updates, availability and ending use
+AI output can be inaccurate. Review it before acting on it or changing your projects.
 
-Compatibility can change when Orbit, Codex or the plugin changes. We may release fixes and updates. Any material change to these terms should be published with an effective date and notice appropriate to the change and applicable law; do not treat changes as retroactive acceptance.
+## Updates and ending use
 
-You can stop using and uninstall the plugin at any time. Uninstalling it does not delete your Orbit projects, host chat history or necessarily remove the plugin's local runtime caches. The privacy notice explains the separate controls.
+Compatibility can change when Orbit, Codex or the integration changes. We may release fixes and updates. We will publish material changes to these terms with an updated date and provide notice appropriate to the change and applicable law. Changes do not apply retroactively to remove rights you already have.
+
+You can stop using and uninstall Orbit Browser at any time. Uninstalling does not delete your Orbit projects, chat history held by the AI host or necessarily remove the integration's local runtime caches. The [privacy notice](https://orbitdesktop.com/privacy/#retention-and-deletion) explains the separate controls.
 
 ## Your legal rights
 
-Nothing in these terms removes your mandatory statutory rights or excludes or limits liability that cannot lawfully be excluded or limited. If a part of these terms cannot be enforced, the remaining terms continue to apply to the extent permitted by law.
+Nothing in these terms removes your mandatory statutory rights or excludes or limits liability that cannot lawfully be excluded or limited. If a part of these terms cannot be enforced, the rest continues to apply to the extent permitted by law.
 
-For help, complaints or questions, contact support@orbitdesktop.com. These terms do not require you to give up legal rights or accept private arbitration.
-
-## Publisher review notes — remove before publication
-
-Confirm the company details and the permission to distribute all packaged code and visual assets. Decide whether a jurisdiction clause is needed and have it checked for your intended users. This narrow plugin draft deliberately avoids inventing purchase, refund, cancellation, tax or subscription terms for Orbit itself.
-
-Relevant primary guidance for that separate commercial review: [GOV.UK online and distance selling](https://www.gov.uk/online-and-distance-selling-for-businesses). Do not treat a generic plugin notice as sufficient terms for paid digital-content sales.
+For help, a complaint or a question about your rights, contact [support@orbitdesktop.com](mailto:support@orbitdesktop.com). These terms do not require you to accept private arbitration or give up rights available under applicable law.

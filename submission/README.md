@@ -7,7 +7,7 @@ Prepared 24 October 2026 for version 0.3.5. This is a preparation kit, not evide
 - `orbit-browser-0.3.5.zip`: plugin upload. Its root contains `.codex-plugin/plugin.json`, `.mcp.json`, the runtime launcher, read-only tools, UI and icons.
 - `orbit-browser-demo-workspace.zip`: synthetic Orbit workspace for reviewer setup and recording. Import through Orbit Settings → Data → Import. It adds one project; importing twice adds duplicates. Use a separate review installation/workspace and leave preference import off. It contains no credentials, local folders, files or private data.
 - `listing-copy.md`: text generated from the shipped manifest.
-- `terms-draft.md` and `privacy-draft.md`: proposed public legal copy. Neither is approved or published. Resolve the publisher details and retention decisions before publication.
+- `terms-draft.md` and `privacy-draft.md`: proposed public legal copy. The publication candidates match the website changes in [website PR #1](https://github.com/captenmasin/orbit-marketing/pull/1). The owner confirmed inbox-only support, retention for 12 months after resolution, and company-number/registry-link disclosure without a public postal address. The pages are not published; the receiving mailbox provider and relevant transfer arrangements still need confirmation.
 - `walkthrough.md`: recording and reviewer run sheet.
 - `submission-status.json`: outstanding submission items.
 - `SHA256SUMS`: checksums of the plugin, workspace and complete kit ZIPs, provided beside the ZIPs.
@@ -32,7 +32,7 @@ Orbit Browser is a local stdio MCP plugin. It needs a local Codex chat on the sa
 
 1. Confirm the submitting organisation has approved-partner local MCP access. Send its organisation ID to your OpenAI representative and wait for allowlisting confirmation. Do not put the organisation ID or private access details in this public kit.
 2. Complete developer/business identity verification and confirm owner or Apps Management Write access. The suggested publisher, **SpacemanCodes LTD**, follows Orbit's public website; select the matching verified identity. The portal controls the final displayed developer identity.
-3. Approve the legal drafts, add the required business details and retention decisions, and publish the final pages under an Orbit-controlled HTTPS site. Current product/support/privacy links have been checked; `https://orbitdesktop.com/terms/` returned 404 on 24 October 2026, so no terms URL is invented in the manifest.
+3. Review the prepared website pages in [website PR #1](https://github.com/captenmasin/orbit-marketing/pull/1), confirm the receiving mailbox provider and relevant transfer arrangements, and publish the final pages under an Orbit-controlled HTTPS site. Company number 12193639 is linked to Companies House; the owner has chosen not to publish a postal address, so statutory address-disclosure completeness has not been established. Current product/support/privacy links have been checked; `https://orbitdesktop.com/terms/` returned 404 on 24 October 2026, so no terms URL is invented in the manifest.
 4. Set `interface.termsOfServiceURL` and the final `interface.privacyPolicyURL` in `.codex-plugin/plugin.json`. Record the real workflows and add the accessible video URL as `extensions.com.openai.review.demo_recording_url`. Rebuild and check the ZIP again. An unchanged draft is not ready for review.
 5. Follow the desktop-only flow in the submission portal: **Create plugin → Skills only → Upload ZIP**. Despite the label, this is the documented route for approved local MCP submissions. Choose the verified identity and inspect all imported metadata. No skills are required for this local MCP package.
 6. Resolve automated findings. The manifest contains exactly five positive and three negative review cases. Run them on the review setup and sign off in `walkthrough.md`. Do not represent automated protocol tests as native desktop UI evidence.
@@ -55,7 +55,8 @@ The plugin opens SQLite read-only, keeps reconnects read-only, excludes secret m
 - [x] Square 60 × 60 SVG light/dark icons are included.
 - [x] Importable synthetic sample project and recording script prepared.
 - [ ] Confirm local MCP allowlisting, verified identity and installed Orbit dependency eligibility.
-- [ ] Approve the terms and privacy drafts, fill required business/retention details and publish final HTTPS pages.
+- [x] Prepare website legal pages with the owner-confirmed support retention and company disclosure choices.
+- [ ] Confirm mailbox-provider/transfer arrangements and address-disclosure completeness, then approve and publish the legal pages.
 - [ ] Add the final legal URLs and real recording URL to the manifest and rebuild.
 - [ ] Complete fresh native desktop installation, five positive cases and three negative cases with sample data.
 - [ ] Verify dark theme, narrow layout and actual saved dependency findings. Earlier user screenshots confirmed the light task/document previews; the final scratchpad line-break change still needs native visual sign-off.

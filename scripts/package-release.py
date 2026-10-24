@@ -57,7 +57,7 @@ def build(output):
         'version': version, 'ready_for_submission': False,
         'pending': [
             'Confirm approved-partner local MCP allowlisting and verified publishing identity.',
-            'Approve legal drafts, fill publisher details and retention decisions, and publish them.',
+            'Approve website legal pages after mailbox-provider/transfer and address-disclosure review, then publish them.',
             'Add a working termsOfServiceURL and the final privacyPolicyURL to the manifest, then rebuild.',
             'Record the actual desktop workflows using the demo workspace and add review.demo_recording_url, then rebuild.',
             'Complete clean native desktop installation and reviewer-case sign-off; verify dark theme and saved dependency findings.',
