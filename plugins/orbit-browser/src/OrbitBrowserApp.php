@@ -11,7 +11,7 @@ use Laravel\Mcp\Server\Attributes\Uri;
 
 #[Description('A read-only browser for sharing Orbit project context with chat.')]
 #[AppMeta]
-#[Uri('ui://orbit/browser-v0.3.1')]
+#[Uri('ui://orbit/browser-v0.3.2')]
 class OrbitBrowserApp extends AppResource
 {
     /**

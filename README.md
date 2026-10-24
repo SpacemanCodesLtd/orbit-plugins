@@ -19,7 +19,7 @@ Orbit Browser includes tasks, scratchpad, documents, links, and saved dependency
 
 ## Data and permissions
 
-The server reads your local Orbit workspace. Connecting it lets Codex read those project sections. Selecting an item supplies context to the host; **Start new chat** opens a fresh conversation with that item's source content and project identity. This avoids adding messages to a busy conversation's queue. Chat data is handled by the host under your account settings.
+The server reads your local Orbit workspace. Connecting it lets Codex read those project sections. Selecting an item supplies context to the host; **Start new chat** opens a fresh conversation with a readable brief: the item's title, project, original Markdown and source IDs/revisions. Dependency briefs include saved versions, advisories, check dates and coverage warnings. This avoids adding messages to a busy conversation's queue. Chat data is handled by the host under your account settings.
 
 The plugin exposes only read tools, opens SQLite in read-only mode, and never runs migrations, package updates, dependency checks, or workspace edits. It excludes Orbit's secret values and secret metadata from project content. It has no separate telemetry service. It writes only its own runtime caches under `~/Library/Caches/orbit-browser`.
 
