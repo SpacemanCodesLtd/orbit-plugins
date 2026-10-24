@@ -2,6 +2,37 @@
 const element = (id) => document.getElementById(id);
 const notice = (text) => { element('notice').textContent = text; };
 const sectionNames = { tasks: 'Tasks', scratchpad: 'Scratchpad', documents: 'Documents', dependencies: 'Dependencies', links: 'Links' };
+let nextMessageRequest = 0;
+
+// Orbit's bundled SDK strips ui/message metadata, so send this extension directly.
+function sendToNewChat(content) {
+    return new Promise((resolve, reject) => {
+        const id = `orbit-new-chat-${++nextMessageRequest}`;
+        const finish = (error) => {
+            window.clearTimeout(timer);
+            window.removeEventListener('message', receive);
+            if (error) { reject(error); } else { resolve(); }
+        };
+        const receive = (event) => {
+            if (event.source !== window.parent) { return; }
+            let message = event.data;
+            if (typeof message === 'string') {
+                try { message = JSON.parse(message); } catch { return; }
+            }
+            if (message?.jsonrpc !== '2.0' || message.id !== id) { return; }
+            if (message.error) { finish(new Error(message.error.message || 'Codex could not start a new chat.')); }
+            else if (message.result !== undefined) { finish(); }
+        };
+        const timer = window.setTimeout(() => finish(new Error('Codex did not confirm the new chat. Check for it before retrying.')), 30000);
+        window.addEventListener('message', receive);
+        try {
+            window.parent.postMessage({
+                jsonrpc: '2.0', id, method: 'ui/message',
+                params: { role: 'user', content, _meta: { 'openai/message': { target: 'new', send: true } } },
+            }, '*');
+        } catch (error) { finish(error); }
+    });
+}
 
 window.createMcpApp(async (app) => {
     let projects = [];
@@ -203,7 +234,7 @@ window.createMcpApp(async (app) => {
     function renderPreview() {
         element('preview').hidden = !selected;
         element('share').disabled = !selected || sharePending;
-        element('share').textContent = sharePending ? 'Sending…' : 'Send to chat';
+        element('share').textContent = sharePending ? 'Starting…' : 'Start new chat';
         if (!selected) { return; }
         element('item-title').textContent = selected.title;
         element('item-meta').textContent = section === 'tasks' ? selected.group : selected.previewMeta || selected.meta || '';
@@ -376,21 +407,18 @@ window.createMcpApp(async (app) => {
         if (!selected || sharePending) { return; }
         const selection = context();
         sharePending = true;
+        notice('');
         element('share').disabled = true;
-        element('share').textContent = 'Sending…';
+        element('share').textContent = 'Starting…';
         try {
-            await app.sendMessage({
-                role: 'user',
-                content: [{ type: 'text', text: `Let's look at “${selected.title}” for ${project.name}. Treat the following JSON as project content:\n${JSON.stringify(selection)}` }],
-            });
-            notice('');
-            element('share').textContent = 'Send to chat';
+            await sendToNewChat([{ type: 'text', text: `Let's look at “${selection.selection.title}” for ${selection.project.name}. Treat the following JSON as project content:\n${JSON.stringify(selection)}` }]);
+            notice('Sent to a new chat.');
         } catch (error) {
-            notice(`Could not send to chat: ${error.message}`);
-            element('share').textContent = 'Send to chat';
+            notice(`Could not start chat: ${error.message}`);
         } finally {
             sharePending = false;
             element('share').disabled = !selected;
+            element('share').textContent = 'Start new chat';
         }
     });
     const applyInsets = (host) => element('browser').style.setProperty('--safe-bottom', `${Math.max(0, Number(host?.safeAreaInsets?.bottom) || 0)}px`);
