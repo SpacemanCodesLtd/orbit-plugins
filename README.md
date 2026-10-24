@@ -2,7 +2,7 @@
 
 The Git-backed beta marketplace for Orbit's local Codex plugins.
 
-The current beta is **Orbit Browser 0.3.6**. Public directory submission is pending OpenAI's confirmation of local MCP eligibility; you can install this beta directly from Git now.
+The current beta is **Orbit Browser 0.3.7**. Public directory submission is pending OpenAI's confirmation of local MCP eligibility; you can install this beta directly from Git now.
 
 ## Install Orbit Browser
 
@@ -11,7 +11,7 @@ Requires macOS, the Codex desktop app with local plugin support, and an installe
 Run in Terminal with the Codex CLI installed:
 
 ```sh
-codex plugin marketplace add captenmasin/orbit-plugins --ref main
+codex plugin marketplace add SpacemanCodesLtd/orbit-plugins --ref main
 codex plugin add orbit-browser@orbit-beta
 ```
 
@@ -34,6 +34,16 @@ For a nonstandard app or workspace location, the launcher honors `ORBIT_APP_PATH
 If startup reports that Orbit is missing, install it in one of the standard locations. If it reports a missing workspace, open Orbit first. If it reports missing MCP Apps support, update Orbit.
 
 ## Update or uninstall
+
+If you installed the beta before the repository moved to SpacemanCodesLtd, replace the marketplace source once:
+
+```sh
+codex plugin marketplace remove orbit-beta
+codex plugin marketplace add SpacemanCodesLtd/orbit-plugins --ref main
+codex plugin add orbit-browser@orbit-beta
+```
+
+Restart Codex afterwards. Your Orbit workspace is unchanged. For later updates:
 
 ```sh
 codex plugin marketplace upgrade orbit-beta
