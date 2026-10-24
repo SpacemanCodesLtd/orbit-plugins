@@ -50,16 +50,15 @@ def build(output):
     write_zip(demo_zip, {'workspace.json': ROOT / 'submission/workspace.json'})
     listing = output / 'listing-copy.md'
     listing.write_text(f"# {interface['displayName']}\n\n{interface['shortDescription']}\n\n{interface['longDescription']}\n\n"
-                       + '\n'.join(f"- {key}: {interface[key]}" for key in ['developerName', 'category', 'websiteURL', 'supportURL', 'privacyPolicyURL'])
+                       + '\n'.join(f"- {key}: {interface[key]}" for key in ['developerName', 'category', 'websiteURL', 'supportURL', 'privacyPolicyURL', 'termsOfServiceURL'])
                        + '\n\nStarter prompts:\n\n' + '\n'.join(f'- {prompt}' for prompt in interface['defaultPrompt']) + '\n')
     readiness = output / 'submission-status.json'
     readiness.write_text(json.dumps({
         'version': version, 'ready_for_submission': False,
         'pending': [
             'Confirm approved-partner local MCP allowlisting and verified publishing identity.',
-            'Approve website legal pages after mailbox-provider/transfer and address-disclosure review, then publish them.',
-            'Add a working termsOfServiceURL and the final privacyPolicyURL to the manifest, then rebuild.',
-            'Record the actual desktop workflows using the demo workspace and add review.demo_recording_url, then rebuild.',
+            'Resolve mailbox-provider/transfer details and company-address disclosure in the published legal pages.',
+            'Review the supplied recording against all reviewer cases and record any missing workflows.',
             'Complete clean native desktop installation and reviewer-case sign-off; verify dark theme and saved dependency findings.',
         ],
         'submitted': False, 'published_to_directory': False,

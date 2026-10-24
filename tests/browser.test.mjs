@@ -79,7 +79,7 @@ function mount(overrides = {}) {
     let ready;
     runInNewContext(source, { currentDependencyCheck, dependencyName, document, window: host });
     const get = (id) => document.getElementById(id);
-    async function click(element) { await element.events.click(); await settle(); }
+    async function click(element, event = { isTrusted: true }) { await element.events.click(event); await settle(); }
     return { ready, get, calls, contexts, messages, click, document, app, requests, host, deliver, timers, listeners };
 }
 
@@ -127,7 +127,7 @@ test('new chat handoff waits for its parent acknowledgement and prevents duplica
     const current = mount({ sendMessage: () => new Promise(() => {}) });
     await current.ready;
     await selectFirstTask(current);
-    const pending = current.get('share').events.click();
+    const pending = current.get('share').events.click({ isTrusted: true });
     await current.click(current.get('share'));
     assert.equal(current.requests.length, 1);
     assert.equal(current.get('share').disabled, true);
@@ -151,7 +151,7 @@ test('an unconfirmed new chat times out without retrying or reporting success', 
     const current = mount({ sendMessage: () => new Promise(() => {}) });
     await current.ready;
     await selectFirstTask(current);
-    const pending = current.get('share').events.click();
+    const pending = current.get('share').events.click({ isTrusted: true });
     [...current.timers.values()][0]();
     await pending;
     assert.match(current.get('notice').textContent, /did not confirm.*Check for it before retrying/);
@@ -159,6 +159,22 @@ test('an unconfirmed new chat times out without retrying or reporting success', 
     assert.equal(current.get('share').disabled, false);
     assert.equal(current.listeners.size, 0);
     assert.equal(current.timers.size, 0);
+});
+
+test('automated sharing asks for a manual click without sending or waiting, and a manual click can follow', async () => {
+    const current = mount();
+    await current.ready;
+    await selectFirstTask(current);
+    await current.click(current.get('share'), { isTrusted: false });
+    assert.match(current.get('notice').textContent, /manual click/);
+    assert.equal(current.requests.length, 0);
+    assert.equal(current.timers.size, 0);
+    assert.equal(current.listeners.size, 0);
+    assert.equal(current.get('share').disabled, false);
+    assert.equal(current.get('share').textContent, 'Start new chat');
+    await current.click(current.get('share'));
+    assert.equal(current.requests.length, 1);
+    assert.equal(current.get('notice').textContent, 'Sent to a new chat.');
 });
 
 test('a rejected bridge post is shown as an error and a subsequent attempt uses a fresh request ID', async () => {

@@ -461,8 +461,12 @@ window.createMcpApp(async (app) => {
     element('search').addEventListener('input', renderProjects);
     element('item-search').addEventListener('input', () => renderItems());
     element('refresh').addEventListener('click', () => { void refresh(); });
-    element('share').addEventListener('click', async () => {
+    element('share').addEventListener('click', async (event) => {
         if (!selected || sharePending) { return; }
+        if (!event.isTrusted) {
+            notice('This handoff needs a manual click. Click “Start new chat” yourself in Codex.');
+            return;
+        }
         const selection = context();
         sharePending = true;
         notice('');

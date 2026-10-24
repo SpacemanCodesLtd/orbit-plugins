@@ -1,6 +1,6 @@
-# Orbit Browser terms — publication candidate
+# Orbit Browser terms — published reference
 
-**Prepared for review; not yet published.** Website source and publication review: https://github.com/captenmasin/orbit-marketing/pull/1. The owner confirmed inbox-only support, 12-month retention after resolution, and company-number/registry-link disclosure without publishing a postal address. The receiving mailbox provider and relevant transfer arrangements still need confirmation. [GOV.UK guidance](https://www.gov.uk/running-a-limited-company/signs-stationery-and-promotional-material) requires the registered office address and registration jurisdiction on a limited-company website. A Companies House link alone does not satisfy that guidance. The owner has requested no public postal address, so resolve this before publication.
+**Published reference:** https://orbitdesktop.com/terms/. Website source and publication review: https://github.com/captenmasin/orbit-marketing/pull/1. The owner confirmed inbox-only support, 12-month retention after resolution, and company-number/registry-link disclosure without publishing a postal address. The receiving mailbox provider and relevant transfer arrangements still need confirmation. [GOV.UK guidance](https://www.gov.uk/running-a-limited-company/signs-stationery-and-promotional-material) requires the registered office address and registration jurisdiction on a limited-company website. A Companies House link alone does not satisfy that guidance. The owner has requested no public postal address, so this disclosure issue remains unresolved.
 
 Last updated: 24 October 2026.
 

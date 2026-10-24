@@ -19,6 +19,7 @@
     "websiteURL": "https://orbitdesktop.com",
     "supportURL": "https://orbitdesktop.com/contact/",
     "privacyPolicyURL": "https://orbitdesktop.com/privacy/",
+    "termsOfServiceURL": "https://orbitdesktop.com/terms/",
     "defaultPrompt": [
       "Browse my Orbit projects.",
       "Show the tasks and notes for an Orbit project.",
@@ -43,6 +44,7 @@
   "extensions": {
     "com.openai": {
       "review": {
+        "demo_recording_url": "https://media.orbitdesktop.com/orbit-browser-demo-2026-10-24.mp4",
         "test_cases": {
           "positive": [
             {
