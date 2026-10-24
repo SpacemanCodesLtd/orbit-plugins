@@ -1,6 +1,6 @@
 {
   "name": "orbit-browser",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "Browse and share local Orbit project context in Codex.",
   "requires_local_executor": true,
   "interface": {
@@ -18,7 +18,7 @@
     "logoDark": "./assets/icon-dark.svg",
     "websiteURL": "https://orbitdesktop.com",
     "supportURL": "https://orbitdesktop.com/contact/",
-    "privacyPolicyURL": "https://github.com/captenmasin/orbit-plugins/blob/main/plugins/orbit-browser/README.md#data-and-privacy",
+    "privacyPolicyURL": "https://github.com/SpacemanCodesLtd/orbit-plugins/blob/main/plugins/orbit-browser/README.md#data-and-privacy",
     "defaultPrompt": [
       "Browse my Orbit projects.",
       "Show the tasks and notes for an Orbit project.",
@@ -32,7 +32,7 @@
     "url": "https://orbitdesktop.com"
   },
   "homepage": "https://orbitdesktop.com",
-  "repository": "https://github.com/captenmasin/orbit-plugins",
+  "repository": "https://github.com/SpacemanCodesLtd/orbit-plugins",
   "keywords": [
     "orbit",
     "projects",
@@ -99,7 +99,7 @@
         "commerce_description": "Orbit Browser does not sell products, process payments, start subscriptions or promote upgrades. The separately installed Orbit application has its own terms."
       },
       "publication": {
-        "release_notes": "Changed\n- Refresh the Git-backed beta with the latest project browser and readable chat briefs.\n- Publish plugin privacy information with the beta installation instructions.\n\nFixed\n- Explain when starting a chat needs a manual click."
+        "release_notes": "Changed\n- Move the Git-backed marketplace to the SpacemanCodesLtd GitHub organization.\n- Update installation, support and privacy links to the new repository."
       }
     }
   }
