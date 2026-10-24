@@ -140,7 +140,7 @@
                                 <h2 id="item-title" tabindex="-1"></h2>
                                 <p id="item-meta" class="muted"></p>
                             </div>
-                            <button id="share" type="button" disabled>Send to chat</button>
+                            <button id="share" type="button" disabled>Start new chat</button>
                         </div>
                         <div id="item-body"></div>
                     </section>

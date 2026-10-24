@@ -99,7 +99,7 @@ class PluginTests(unittest.TestCase):
         before = hashlib.sha256(self.database.read_bytes()).digest()
         responses = self.run_server([
             {'method': 'tools/list'},
-            {'method': 'resources/read', 'params': {'uri': 'ui://orbit/browser-v0.3.0'}},
+            {'method': 'resources/read', 'params': {'uri': 'ui://orbit/browser-v0.3.1'}},
             {'method': 'tools/call', 'params': {'name': 'read-workspace-tool', 'arguments': {}}},
             {'method': 'tools/call', 'params': {'name': 'read-browser-content-tool', 'arguments': {'project_id': PROJECT_ID}}},
             {'method': 'tools/call', 'params': {'name': 'read-browser-content-tool', 'arguments': {'project_id': PROJECT_ID, 'section': 'inspection'}}},
@@ -114,7 +114,7 @@ class PluginTests(unittest.TestCase):
         self.assertTrue(all(t['annotations']['readOnlyHint'] for t in tools))
         self.assertEqual(tools[0]['_meta']['openai/ui']['entrypoints'], [{'type': 'global'}])
         html = results[3]['result']['contents'][0]['text']
-        for expected in ['Find a project', 'Send to chat', 'ui/initialize', 'currentDependencyCheck']:
+        for expected in ['Find a project', 'Start new chat', 'ui/initialize', 'currentDependencyCheck']:
             self.assertIn(expected, html)
         self.assertNotIn('file_get_contents', html)
         workspace = json.loads(results[4]['result']['content'][0]['text'])

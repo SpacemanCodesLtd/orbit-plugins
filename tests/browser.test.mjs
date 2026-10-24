@@ -41,6 +41,10 @@ function mount(overrides = {}) {
     const calls = [];
     const contexts = [];
     const messages = [];
+    const requests = [];
+    const listeners = new Set();
+    const timers = new Map();
+    let timerId = 0;
     const app = {
         async callServerTool(params) {
             calls.push(copy(params));
@@ -52,11 +56,31 @@ function mount(overrides = {}) {
         onHostContextChanged() {},
         ...overrides,
     };
+    const host = {
+        setTimeout(callback) { timers.set(++timerId, callback); return timerId; },
+        clearTimeout(id) { timers.delete(id); },
+        addEventListener(name, callback) { assert.equal(name, 'message'); listeners.add(callback); },
+        removeEventListener(name, callback) { listeners.delete(callback); },
+        createMcpApp: (setup) => { ready = setup(app); return ready; },
+        parent: {
+            postMessage(request, origin) {
+                assert.equal(origin, '*');
+                requests.push(copy(request));
+                Promise.resolve().then(() => app.sendMessage(request.params)).then(
+                    (result) => deliver({ jsonrpc: '2.0', id: request.id, result: result ?? {} }),
+                    (error) => deliver({ jsonrpc: '2.0', id: request.id, error: { message: error.message } }),
+                );
+            },
+        },
+    };
+    function deliver(data, source = host.parent) {
+        for (const listener of listeners) { listener({ source, data }); }
+    }
     let ready;
-    runInNewContext(source, { currentDependencyCheck, dependencyName, document, window: { createMcpApp: (setup) => { ready = setup(app); return ready; } } });
+    runInNewContext(source, { currentDependencyCheck, dependencyName, document, window: host });
     const get = (id) => document.getElementById(id);
     async function click(element) { await element.events.click(); await settle(); }
-    return { ready, get, calls, contexts, messages, click, document, app };
+    return { ready, get, calls, contexts, messages, click, document, app, requests, host, deliver, timers, listeners };
 }
 
 async function selectFirstTask(current) {
@@ -82,9 +106,67 @@ test('browser lists and filters projects, renders task data as text and sends on
     });
     await current.click(current.get('share'));
     assert.equal(current.messages.length, 1);
+    assert.deepEqual(current.requests[0].params._meta, { 'openai/message': { target: 'new', send: true } });
+    assert.equal(current.requests[0].method, 'ui/message');
+    assert.equal(current.get('notice').textContent, 'Sent to a new chat.');
     assert.match(current.messages[0].content[0].text, /Task details/);
     assert.doesNotMatch(JSON.stringify(current.messages), /Private notes|TOKEN|Unrelated document/);
     assert.equal(current.calls.every(({ name }) => ['read-workspace-tool', 'read-browser-content-tool'].includes(name)), true);
+    assert.equal(current.listeners.size, 0);
+    assert.equal(current.timers.size, 0);
+});
+
+test('new chat handoff waits for its parent acknowledgement and prevents duplicate clicks', async () => {
+    const current = mount({ sendMessage: () => new Promise(() => {}) });
+    await current.ready;
+    await selectFirstTask(current);
+    const pending = current.get('share').events.click();
+    await current.click(current.get('share'));
+    assert.equal(current.requests.length, 1);
+    assert.equal(current.get('share').disabled, true);
+    assert.equal(current.get('share').textContent, 'Starting…');
+    const reply = { jsonrpc: '2.0', id: current.requests[0].id, result: {} };
+    current.deliver(reply, {});
+    current.deliver({ ...reply, id: 1 });
+    current.deliver({ ...reply, jsonrpc: '1.0' });
+    current.deliver({ ...reply, result: undefined });
+    current.deliver('invalid JSON');
+    assert.equal(current.get('share').disabled, true);
+    current.deliver(JSON.stringify(reply));
+    await pending;
+    assert.equal(current.get('share').disabled, false);
+    assert.equal(current.get('share').textContent, 'Start new chat');
+    assert.equal(current.listeners.size, 0);
+    assert.equal(current.timers.size, 0);
+});
+
+test('an unconfirmed new chat times out without retrying or reporting success', async () => {
+    const current = mount({ sendMessage: () => new Promise(() => {}) });
+    await current.ready;
+    await selectFirstTask(current);
+    const pending = current.get('share').events.click();
+    [...current.timers.values()][0]();
+    await pending;
+    assert.match(current.get('notice').textContent, /did not confirm.*Check for it before retrying/);
+    assert.equal(current.requests.length, 1);
+    assert.equal(current.get('share').disabled, false);
+    assert.equal(current.listeners.size, 0);
+    assert.equal(current.timers.size, 0);
+});
+
+test('a rejected bridge post is shown as an error and a subsequent attempt uses a fresh request ID', async () => {
+    const current = mount();
+    await current.ready;
+    await selectFirstTask(current);
+    const post = current.host.parent.postMessage;
+    current.host.parent.postMessage = () => { throw new Error('Host unavailable'); };
+    await current.click(current.get('share'));
+    assert.match(current.get('notice').textContent, /Host unavailable/);
+    assert.equal(current.listeners.size, 0);
+    current.host.parent.postMessage = post;
+    await current.click(current.get('share'));
+    assert.equal(current.requests[0].id, 'orbit-new-chat-2');
+    assert.equal(current.get('notice').textContent, 'Sent to a new chat.');
 });
 
 test('browser gives distinct empty workspace, filtered and empty task states', async () => {
@@ -241,6 +323,7 @@ test('scratchpad, nested documents and links share their source content without 
     assert.equal(shared.selection.kind, 'link');
     assert.equal(shared.selection.url, 'https://example.com');
     assert.equal(shared.selection.category, 'Production');
+    assert.equal(current.requests.every(({ params }) => params._meta['openai/message'].target === 'new' && params._meta['openai/message'].send === true), true);
 });
 
 function inspectionData() {

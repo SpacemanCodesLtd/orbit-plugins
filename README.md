@@ -19,7 +19,7 @@ Orbit Browser includes tasks, scratchpad, documents, links, and saved dependency
 
 ## Data and permissions
 
-The server reads your local Orbit workspace. Connecting it lets Codex read those project sections. Selecting an item makes its context available to the current chat; **Send to chat** submits a message about it. Chat data is handled by the host under your account settings.
+The server reads your local Orbit workspace. Connecting it lets Codex read those project sections. Selecting an item supplies context to the host; **Start new chat** opens a fresh conversation with that item's source content and project identity. This avoids adding messages to a busy conversation's queue. Chat data is handled by the host under your account settings.
 
 The plugin exposes only read tools, opens SQLite in read-only mode, and never runs migrations, package updates, dependency checks, or workspace edits. It excludes Orbit's secret values and secret metadata from project content. It has no separate telemetry service. It writes only its own runtime caches under `~/Library/Caches/orbit-browser`.
 
@@ -56,6 +56,6 @@ node --test tests/browser.test.mjs
 python3 -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
-Integration tests use a temporary workspace and a relocated copy of the plugin. They check protocol startup, rendered UI, safe Markdown, project and dependency reads, validation, missing-install errors, write-tool rejection, and SQLite write protection across reconnects. They never use your real workspace.
+Integration tests use a temporary workspace and a relocated copy of the plugin. They check protocol startup, rendered UI, safe Markdown, project and dependency reads, validation, missing-install errors, write-tool rejection, and SQLite write protection across reconnects. They never use your real workspace. Browser tests inspect the actual `ui/message` request, including the new-chat destination, parent acknowledgement, rejection, timeout and duplicate-click protection. Acknowledgement confirms the host accepted the request; it does not prove that a model has read it.
 
 Before publishing an update, run both suites, bump the plugin and server version, and change the UI resource URI when its HTML changes. Open a GitHub issue here for beta feedback; remove private project content before posting logs or screenshots.
