@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "orbit-browser": {
+      "command": "/bin/sh",
+      "args": [
+        "./scripts/start.sh"
+      ],
+      "cwd": "."
+    }
+  }
+}

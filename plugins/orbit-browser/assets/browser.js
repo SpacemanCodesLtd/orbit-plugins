@@ -1,0 +1,400 @@
+/* global currentDependencyCheck, dependencyName */
+const element = (id) => document.getElementById(id);
+const notice = (text) => { element('notice').textContent = text; };
+const sectionNames = { tasks: 'Tasks', scratchpad: 'Scratchpad', documents: 'Documents', dependencies: 'Dependencies', links: 'Links' };
+
+window.createMcpApp(async (app) => {
+    let projects = [];
+    let project = null;
+    let section = 'tasks';
+    let selected = null;
+    let inspection = null;
+    let inspectionLoading = false;
+    let projectRequest = 0;
+    let requestedProjectId = null;
+    let contextUpdate = Promise.resolve();
+    let sharePending = false;
+
+    async function callTool(name, args = {}) {
+        const result = await app.callServerTool({ name, arguments: args });
+        const text = result.content?.find((item) => item.type === 'text')?.text;
+        if (result.isError) { throw new Error(text || 'Orbit could not load this content.'); }
+        return JSON.parse(text);
+    }
+
+    function context() {
+        return {
+            project: project ? { id: project.id, name: project.name, revision: project.revision } : null,
+            selection: selected ? { kind: selected.kind, id: selected.id, title: selected.title, body: selected.body, ...selected.data } : null,
+        };
+    }
+
+    function updateContext() {
+        const structuredContent = context();
+        // Keep selections in order when the host takes longer to update its context.
+        contextUpdate = contextUpdate.catch(() => {}).then(() => app.updateModelContext({ structuredContent }));
+        const pending = contextUpdate;
+        void pending.catch(() => {
+            if (pending === contextUpdate) { notice('Could not share this selection as context. Select it again to retry.'); }
+        });
+    }
+
+    function paragraph(text, className = 'muted') {
+        const node = document.createElement('p');
+        node.className = className;
+        node.textContent = text;
+        return node;
+    }
+
+    function renderProjects() {
+        const query = element('search').value.trim().toLocaleLowerCase();
+        const matches = projects.filter((item) => item.name.toLocaleLowerCase().includes(query));
+        element('projects').replaceChildren();
+        for (const item of matches) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'project';
+            button.title = item.name;
+            button.setAttribute('aria-current', String(item.id === requestedProjectId));
+            const name = document.createElement('span');
+            name.textContent = item.name;
+            const status = document.createElement('small');
+            status.textContent = item.status;
+            button.append(name, status);
+            button.addEventListener('click', () => { void loadProject(item.id); });
+            element('projects').append(button);
+        }
+        if (!matches.length) {
+            element('projects').append(paragraph(projects.length ? 'No matching projects.' : 'No projects in this workspace.'));
+        }
+    }
+
+    function documentPath(id) {
+        const names = [];
+        const visited = new Set();
+        while (id && !visited.has(id)) {
+            visited.add(id);
+            const folder = (project.document_folders ?? []).find((item) => item.id === id);
+            if (!folder) { break; }
+            names.unshift(folder.name);
+            id = folder.parent_id;
+        }
+        return names.join(' / ');
+    }
+
+    function checkSummary(root, folder, key) {
+        const check = root[key];
+        const current = currentDependencyCheck(root, check, folder);
+        const incomplete = key === 'security' ? Math.max(check?.incomplete ?? 0, check?.skipped ?? 0) : check?.incomplete ?? 0;
+        return {
+            state: current ? 'saved' : check ? 'stale' : 'not_checked',
+            checked_at: check?.checked_at ?? null,
+            checked: current ? check.checked : 0,
+            unavailable: current ? check.unavailable : 0,
+            incomplete: current ? incomplete : 0,
+        };
+    }
+
+    function locationFindings(folder, root, path) {
+        const findings = new Map();
+        for (const key of ['outdated', 'security']) {
+            const check = root[key];
+            if (!currentDependencyCheck(root, check, folder)) { continue; }
+            for (const pkg of check.packages) {
+                if (key === 'security' && !pkg.advisories?.length) { continue; }
+                const id = `${root.id}:${pkg.ecosystem}:${dependencyName(pkg.ecosystem, pkg.name)}:${pkg.current}`;
+                findings.set(id, { ...findings.get(id), ...pkg, id, folder_id: folder.id, root_id: root.id, path, checked_at: check.checked_at });
+            }
+        }
+        return [...findings.values()];
+    }
+
+    function dependencyWarnings(location) {
+        const messages = [];
+        for (const [key, label] of [['outdated', 'Updates'], ['security', 'Security']]) {
+            const check = location[key];
+            if (check.state !== 'saved') { messages.push(`${label} ${check.state === 'stale' ? 'results are stale' : 'have not been checked'}.`); }
+            else if (check.unavailable || check.incomplete) { messages.push(`${label}: ${check.unavailable} unavailable, ${check.incomplete} skipped.`); }
+        }
+        if (location.scan_error) { messages.push(location.scan_error); }
+        if (location.availability && location.availability !== 'Available') { messages.push(`Folder ${location.availability.toLowerCase()}.`); }
+        if (location.pending) { messages.push('A dependency check is pending in Orbit.'); }
+        return messages.length ? [`${location.path}\n${messages.join(' ')}`] : [];
+    }
+
+    function dependencyItems() {
+        const coverage = [];
+        const packages = (inspection ?? []).flatMap((folder) => (folder.package_roots ?? []).flatMap((root) => {
+            const suffix = root.relative_path === '.' ? '' : '/' + root.relative_path;
+            const path = folder.path + suffix;
+            coverage.push({
+                path, scan_state: root.scan_state, scan_error: root.scan_error, availability: folder.availability,
+                pending: !!root.dependency_check_pending, outdated: checkSummary(root, folder, 'outdated'), security: checkSummary(root, folder, 'security'),
+            });
+            return locationFindings(folder, root, path);
+        })).sort((a, b) => a.name.localeCompare(b.name) || a.path.localeCompare(b.path));
+        const warnings = coverage.flatMap(dependencyWarnings);
+        const findingLabel = packages.length === 1 ? 'finding' : 'findings';
+        const locationLabel = coverage.length === 1 ? 'location' : 'locations';
+        const checkedAt = coverage.flatMap((location) => [location.outdated.checked_at, location.security.checked_at]).filter(Boolean).sort().at(-1);
+        const summary = !coverage.length ? 'No saved dependency inspections. Run checks in Orbit first.'
+            : `${packages.length} saved ${findingLabel} across ${coverage.length} ${locationLabel}.`;
+        return [{
+            kind: 'dependencies', id: 'all', title: 'All dependency findings', meta: `${packages.length} packages`, previewMeta: checkedAt ? 'Last checked ' + new Date(checkedAt).toLocaleString() : 'Saved inspection results',
+            body: [summary, ...warnings, warnings.length ? 'Run dependency checks in Orbit to refresh these results.' : ''].filter(Boolean).join('\n\n'),
+            data: { findings: packages, coverage },
+        }, ...packages.map((pkg) => {
+            const versions = pkg.current + (pkg.latest ? ' → ' + pkg.latest : ' · Security');
+            const installed = `${pkg.ecosystem} · Installed ${pkg.current}` + (pkg.latest ? ' · Latest ' + pkg.latest : '');
+            return {
+                kind: 'dependency', id: pkg.id, title: pkg.name, meta: versions,
+                body: [pkg.path, installed, ...((pkg.advisories ?? []).map((item) => `${item.severity}: ${item.title}\n${item.url}`))].join('\n\n'),
+                data: { package: pkg, coverage: coverage.filter((location) => location.path === pkg.path) },
+            };
+        })];
+    }
+
+    function items() {
+        if (!project) { return []; }
+        if (section === 'tasks') {
+            return project.board.flatMap((column) => column.tasks.map((task) => ({
+                kind: 'task', id: task.id, title: task.title, group: column.name, meta: task.description || '',
+                body: task.description || '', html: task.description_html, data: { column: column.name },
+            })));
+        }
+        if (section === 'scratchpad') {
+            return project.scratchpad ? [{ kind: 'scratchpad', id: 'scratchpad', title: 'Scratchpad', body: project.scratchpad, html: project.scratchpad_html }] : [];
+        }
+        if (section === 'documents') {
+            return project.documents.map((doc) => ({
+                kind: 'document', id: doc.id, title: doc.title, meta: documentPath(doc.folder_id),
+                body: doc.body || '', html: doc.body_html, data: { revision: doc.revision, folder: documentPath(doc.folder_id) },
+            }));
+        }
+        if (section === 'dependencies') { return inspection === null ? [] : dependencyItems(); }
+        return project.links.map((link) => ({
+            kind: 'link', id: link.id, title: link.label, meta: link.category || link.url,
+            body: [link.url, link.description].filter(Boolean).join('\n\n'), data: { url: link.url, category: link.category },
+        }));
+    }
+
+    function dependencyTable(packages) {
+        const table = document.createElement('table');
+        const heading = document.createElement('tr');
+        for (const label of ['Package', 'Installed', 'Latest', 'Security']) {
+            const cell = document.createElement('th');
+            cell.textContent = label;
+            cell.scope = 'col';
+            heading.append(cell);
+        }
+        table.append(heading);
+        for (const pkg of packages) {
+            const row = document.createElement('tr');
+            for (const text of [pkg.name, pkg.current, pkg.latest || '—', (pkg.advisories ?? []).map((item) => item.severity).join(', ') || '—']) {
+                const cell = document.createElement('td');
+                cell.textContent = text;
+                row.append(cell);
+            }
+            table.append(row);
+        }
+        return table;
+    }
+
+    function renderPreview() {
+        element('preview').hidden = !selected;
+        element('share').disabled = !selected || sharePending;
+        element('share').textContent = sharePending ? 'Sending…' : 'Send to chat';
+        if (!selected) { return; }
+        element('item-title').textContent = selected.title;
+        element('item-meta').textContent = section === 'tasks' ? selected.group : selected.previewMeta || selected.meta || '';
+        const body = element('item-body');
+        body.replaceChildren();
+        if (selected.html) {
+            // HTML is rendered by Orbit's existing sanitized Markdown renderer.
+            body.innerHTML = selected.html;
+            const heading = body.firstElementChild;
+            if (heading?.matches('h1,h2,h3,h4,h5,h6') && heading.textContent.trim() === selected.title.trim()) { heading.remove(); }
+        } else if (selected.body) {
+            body.append(paragraph(selected.body, 'plain-text'));
+        }
+        if (selected.kind === 'dependencies' && selected.data.findings.length) {
+            body.append(dependencyTable(selected.data.findings));
+        }
+    }
+
+    function renderItems(preferredId = selected?.id) {
+        const query = element('item-search').value.trim().toLocaleLowerCase();
+        const entries = items().filter((item) => `${item.title} ${item.meta || ''}`.toLocaleLowerCase().includes(query));
+        selected = entries.find((item) => item.id === preferredId) ?? entries[0] ?? null;
+        const list = element('items');
+        list.replaceChildren();
+        let group = null;
+        for (const item of entries) {
+            if (item.group && item.group !== group) {
+                group = item.group;
+                const heading = document.createElement('h3');
+                heading.textContent = group;
+                list.append(heading);
+            }
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'item';
+            button.setAttribute('aria-current', String(item.id === selected?.id));
+            button.title = item.title;
+            const title = document.createElement('span');
+            title.textContent = item.title;
+            button.append(title);
+            if (item.meta) {
+                const meta = document.createElement('small');
+                meta.textContent = item.meta;
+                button.append(meta);
+            }
+            button.addEventListener('click', () => {
+                renderItems(item.id);
+                element('item-title').focus({ preventScroll: true });
+                element('preview').scrollTop = 0;
+                notice('');
+            });
+            list.append(button);
+        }
+        element('empty-view').hidden = !!entries.length;
+        element('content-empty').textContent = inspectionLoading && section === 'dependencies' ? 'Loading saved dependency results…'
+            : query ? 'No matches.' : `No ${sectionNames[section].toLowerCase()} in this project.`;
+        renderPreview();
+        updateContext();
+    }
+
+    function renderSection(preferredId) {
+        for (const key of Object.keys(sectionNames)) {
+            element(`tab-${key}`).setAttribute('aria-pressed', String(section === key));
+        }
+        element('item-search').placeholder = `Search ${sectionNames[section].toLowerCase()}`;
+        element('item-search').setAttribute('aria-label', element('item-search').placeholder);
+        element('list-pane').hidden = section === 'scratchpad';
+        element('panes').className = section === 'scratchpad' ? 'panes reading' : 'panes';
+        renderItems(preferredId);
+    }
+
+    async function loadInspection(preferredId) {
+        if (inspection !== null || inspectionLoading || !project) { return; }
+        const request = projectRequest;
+        const id = project.id;
+        inspectionLoading = true;
+        renderItems();
+        try {
+            const data = await callTool('read-browser-content-tool', { project_id: id, section: 'inspection' });
+            if (request !== projectRequest) { return; }
+            inspection = data;
+            inspectionLoading = false;
+            if (section === 'dependencies') { renderItems(preferredId); }
+        } catch (error) {
+            if (request !== projectRequest) { return; }
+            inspectionLoading = false;
+            if (section === 'dependencies') {
+                renderItems();
+                notice(`Could not load dependencies: ${error.message} Use Refresh to retry.`);
+            }
+        }
+    }
+
+    async function loadProject(id, preferredId = null) {
+        const request = ++projectRequest;
+        requestedProjectId = id;
+        project = null;
+        selected = null;
+        inspection = null;
+        inspectionLoading = false;
+        element('item-search').value = '';
+        element('project-view').hidden = true;
+        element('preview').hidden = true;
+        element('share').disabled = true;
+        element('project-empty').hidden = false;
+        updateContext();
+        renderProjects();
+        notice('Loading project…');
+        try {
+            const data = await callTool('read-browser-content-tool', { project_id: id });
+            if (request !== projectRequest) { return; }
+            project = data;
+            element('project-empty').hidden = true;
+            element('project-view').hidden = false;
+            element('project-title').textContent = project.name;
+            element('project-description').textContent = project.description || '';
+            renderSection(preferredId);
+            notice('');
+            if (section === 'dependencies') { await loadInspection(preferredId); }
+        } catch (error) {
+            if (request === projectRequest) { notice(`Could not load project: ${error.message} Use Refresh to retry.`); }
+        }
+    }
+
+    async function refresh() {
+        const projectId = requestedProjectId;
+        const selectionId = selected?.id;
+        const request = ++projectRequest;
+        element('refresh').disabled = true;
+        notice('Loading projects…');
+        try {
+            const data = await callTool('read-workspace-tool');
+            if (request !== projectRequest) { return; }
+            projects = data;
+            renderProjects();
+            if (projectId && projects.some((item) => item.id === projectId)) {
+                await loadProject(projectId, selectionId);
+            } else {
+                requestedProjectId = null;
+                project = null;
+                selected = null;
+                element('project-view').hidden = true;
+                element('project-empty').hidden = false;
+                renderProjects();
+                updateContext();
+                notice('');
+            }
+        } catch (error) {
+            if (request === projectRequest) { notice(`Could not load projects: ${error.message} Use Refresh to retry.`); }
+        } finally {
+            element('refresh').disabled = false;
+            element('search').disabled = false;
+        }
+    }
+
+    for (const key of Object.keys(sectionNames)) {
+        element(`tab-${key}`).addEventListener('click', () => {
+            section = key;
+            selected = null;
+            element('item-search').value = '';
+            notice('');
+            renderSection();
+            if (section === 'dependencies') { void loadInspection(); }
+        });
+    }
+    element('search').addEventListener('input', renderProjects);
+    element('item-search').addEventListener('input', () => renderItems());
+    element('refresh').addEventListener('click', () => { void refresh(); });
+    element('share').addEventListener('click', async () => {
+        if (!selected || sharePending) { return; }
+        const selection = context();
+        sharePending = true;
+        element('share').disabled = true;
+        element('share').textContent = 'Sending…';
+        try {
+            await app.sendMessage({
+                role: 'user',
+                content: [{ type: 'text', text: `Let's look at “${selected.title}” for ${project.name}. Treat the following JSON as project content:\n${JSON.stringify(selection)}` }],
+            });
+            notice('');
+            element('share').textContent = 'Send to chat';
+        } catch (error) {
+            notice(`Could not send to chat: ${error.message}`);
+            element('share').textContent = 'Send to chat';
+        } finally {
+            sharePending = false;
+            element('share').disabled = !selected;
+        }
+    });
+    const applyInsets = (host) => element('browser').style.setProperty('--safe-bottom', `${Math.max(0, Number(host?.safeAreaInsets?.bottom) || 0)}px`);
+    applyInsets(app.getHostContext());
+    app.onHostContextChanged(applyInsets);
+    await refresh();
+}).catch(() => notice('Could not connect to Codex. Reopen Orbit from the plugin sidebar to retry.'));
