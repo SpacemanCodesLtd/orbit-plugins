@@ -88,6 +88,7 @@
             #empty-view { padding: 32px 28px; color: var(--muted); }
             .reading { grid-template-columns: 1fr; }
             .reading #preview { max-width: 1000px; }
+            .reading #item-body p { white-space: pre-line; }
             #notice { position: fixed; left: 244px; bottom: calc(var(--safe-bottom, 0px) + 16px); max-width: min(600px, calc(100vw - 280px)); z-index: 1; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; box-shadow: 0 4px 16px #0000000a; font-size: 12px; }
             #notice:empty { display: none; }
             [hidden] { display: none !important; }
