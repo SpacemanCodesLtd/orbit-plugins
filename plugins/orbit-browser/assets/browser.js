@@ -218,12 +218,12 @@ window.createMcpApp(async (app) => {
             });
             return locationFindings(folder, root, path);
         })).sort((a, b) => a.name.localeCompare(b.name) || a.path.localeCompare(b.path));
+        if (!coverage.length) { return []; }
         const warnings = coverage.flatMap(dependencyWarnings);
         const findingLabel = packages.length === 1 ? 'finding' : 'findings';
         const locationLabel = coverage.length === 1 ? 'location' : 'locations';
         const checkedAt = coverage.flatMap((location) => [location.outdated.checked_at, location.security.checked_at]).filter(Boolean).sort().at(-1);
-        const summary = !coverage.length ? 'No saved dependency inspections. Run checks in Orbit first.'
-            : `${packages.length} saved ${findingLabel} across ${coverage.length} ${locationLabel}.`;
+        const summary = `${packages.length} saved ${findingLabel} across ${coverage.length} ${locationLabel}.`;
         return [{
             kind: 'dependencies', id: 'all', title: 'All dependency findings', meta: `${packages.length} packages`, previewMeta: checkedAt ? 'Last checked ' + new Date(checkedAt).toLocaleString() : 'Saved inspection results',
             body: [summary, ...warnings, warnings.length ? 'Run dependency checks in Orbit to refresh these results.' : ''].filter(Boolean).join('\n\n'),
@@ -309,7 +309,11 @@ window.createMcpApp(async (app) => {
 
     function renderItems(preferredId = selected?.id) {
         const query = element('item-search').value.trim().toLocaleLowerCase();
-        const entries = items().filter((item) => `${item.title} ${item.meta || ''}`.toLocaleLowerCase().includes(query));
+        const allEntries = items();
+        const entries = allEntries.filter((item) => `${item.title} ${item.meta || ''}`.toLocaleLowerCase().includes(query));
+        const showList = section !== 'scratchpad' && (section !== 'dependencies' || allEntries.length > 0);
+        element('list-pane').hidden = !showList;
+        element('panes').className = showList ? 'panes' : 'panes reading';
         selected = entries.find((item) => item.id === preferredId) ?? entries[0] ?? null;
         const list = element('items');
         list.replaceChildren();
@@ -344,7 +348,9 @@ window.createMcpApp(async (app) => {
         }
         element('empty-view').hidden = !!entries.length;
         element('content-empty').textContent = inspectionLoading && section === 'dependencies' ? 'Loading saved dependency results…'
-            : query ? 'No matches.' : `No ${sectionNames[section].toLowerCase()} in this project.`;
+            : query ? 'No matches.'
+            : section === 'dependencies' ? inspection === null ? 'Saved dependency results are unavailable. Use Refresh to retry.' : 'No saved dependency inspections. Run checks in Orbit to see results here.'
+            : `No ${sectionNames[section].toLowerCase()} in this project.`;
         renderPreview();
         updateContext();
     }
@@ -355,8 +361,6 @@ window.createMcpApp(async (app) => {
         }
         element('item-search').placeholder = `Search ${sectionNames[section].toLowerCase()}`;
         element('item-search').setAttribute('aria-label', element('item-search').placeholder);
-        element('list-pane').hidden = section === 'scratchpad';
-        element('panes').className = section === 'scratchpad' ? 'panes reading' : 'panes';
         renderItems(preferredId);
     }
 
