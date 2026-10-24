@@ -1,0 +1,106 @@
+{
+  "format": "orbit-workspace",
+  "version": 1,
+  "exported_at": "2026-10-24T12:00:00+00:00",
+  "preferences": {
+    "general": {
+      "startup_destination": "dashboard"
+    },
+    "appearance": {
+      "theme": "system",
+      "reduce_motion": "system",
+      "pointer_cursors": false
+    },
+    "sounds": {
+      "enabled": false,
+      "volume": 0
+    },
+    "project_defaults": {
+      "columns": [
+        {
+          "name": "To Do",
+          "color": "blue"
+        },
+        {
+          "name": "Done",
+          "color": "green"
+        }
+      ]
+    },
+    "project_statuses": {
+      "names": [
+        "Idea",
+        "In Progress",
+        "Live"
+      ],
+      "colors": {
+        "Live": "green"
+      }
+    }
+  },
+  "tags": [
+    "Demo"
+  ],
+  "projects": [
+    {
+      "name": "Orbit Browser Demo",
+      "description": "Synthetic sample project for Orbit Browser marketplace review.",
+      "notes": null,
+      "scratchpad": "# Features\nKeep each note on its own line.\nPreserve Markdown when sharing.\n\n# Questions\nWhat should the next release include?",
+      "status": "Live",
+      "icon_type": "initials",
+      "icon_emoji": null,
+      "icon": null,
+      "tags": [
+        "Demo"
+      ],
+      "repositories": [],
+      "folders": [],
+      "links": [
+        {
+          "label": "Orbit guide",
+          "url": "https://orbitdesktop.com/guide/",
+          "category": "Docs",
+          "description": "Installation and everyday workflows for Orbit.",
+          "icon": null,
+          "important": false
+        }
+      ],
+      "documents": [
+        {
+          "title": "Release checklist",
+          "body": "# Release checklist\n\n## Before release\n\n- Review the task board.\n- Check the document brief.\n- Keep the `version` consistent.\n\n## Handoff\n\nStart a new chat with the complete document.",
+          "important": false,
+          "folder_id": null
+        }
+      ],
+      "document_folders": [],
+      "asset_folders": [],
+      "columns": [
+        {
+          "name": "To Do",
+          "color": "blue",
+          "tasks": [
+            {
+              "title": "Draft release notes",
+              "description": "Prepare a short summary of the release.\n\n- Mention user-visible changes.\n- Keep technical details in the review notes.",
+              "files": []
+            }
+          ]
+        },
+        {
+          "name": "Done",
+          "color": "green",
+          "tasks": [
+            {
+              "title": "Review onboarding",
+              "description": "Confirm that the plugin explains the installed Orbit requirement.",
+              "files": []
+            }
+          ]
+        }
+      ],
+      "files": []
+    }
+  ]
+}

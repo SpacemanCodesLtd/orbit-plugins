@@ -1,13 +1,13 @@
 {
   "name": "orbit-browser",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Browse and share local Orbit project context in Codex.",
   "requires_local_executor": true,
   "interface": {
     "displayName": "Orbit Browser",
-    "shortDescription": "Share project context with chat",
-    "longDescription": "Browse tasks, scratchpad, documents, links and saved dependency findings from your installed Orbit app. Preview and send selected content to chat. Read-only macOS beta; no development checkout or separate PHP installation required.",
-    "developerName": "Orbit",
+    "shortDescription": "Browse your Orbit workspace",
+    "longDescription": "Browse projects saved in Orbit on your Mac. Preview tasks, scratchpad notes, documents, links and saved dependency update or security findings. Start a new Codex chat with a readable brief of the selected item.\n\nRequires macOS, an installed copy of Orbit with MCP Apps support (tested with Orbit 0.5.1), and a local Codex chat. The plugin uses the PHP runtime bundled with Orbit; no separate PHP installation or source checkout is needed.\n\nRead-only: it cannot edit your workspace, install package updates or run dependency checks. Saved findings may be out of date; refresh them in Orbit. Connecting allows Codex to read supported project content. Browsing and sharing can send that content to your AI host under your account settings.",
+    "developerName": "SpacemanCodes LTD",
     "category": "Productivity",
     "capabilities": [
       "Read"
@@ -15,7 +15,91 @@
     "composerIcon": "./assets/icon.svg",
     "logo": "./assets/icon.svg",
     "composerIconDark": "./assets/icon-dark.svg",
-    "logoDark": "./assets/icon-dark.svg"
+    "logoDark": "./assets/icon-dark.svg",
+    "websiteURL": "https://orbitdesktop.com",
+    "supportURL": "https://orbitdesktop.com/contact/",
+    "privacyPolicyURL": "https://orbitdesktop.com/privacy/",
+    "defaultPrompt": [
+      "Browse my Orbit projects.",
+      "Show the tasks and notes for an Orbit project.",
+      "Review saved dependency findings for an Orbit project."
+    ]
   },
-  "mcpServers": "./.mcp.json"
+  "mcpServers": "./.mcp.json",
+  "author": {
+    "name": "SpacemanCodes LTD",
+    "email": "support@orbitdesktop.com",
+    "url": "https://orbitdesktop.com"
+  },
+  "homepage": "https://orbitdesktop.com",
+  "repository": "https://github.com/captenmasin/orbit-plugins",
+  "keywords": [
+    "orbit",
+    "projects",
+    "tasks",
+    "documents",
+    "scratchpad"
+  ],
+  "extensions": {
+    "com.openai": {
+      "review": {
+        "test_cases": {
+          "positive": [
+            {
+              "description": "Browse the sample project and its task board",
+              "prompt": "Open Orbit Browser and show the tasks for Orbit Browser Demo.",
+              "tools_triggered": "browse-orbit-tool, read-workspace-tool, read-browser-content-tool",
+              "expected_behavior": "List the local projects. Selecting Orbit Browser Demo shows Draft release notes in To Do and Review onboarding in Done. Selecting a task highlights it, shows its description and enables Start new chat."
+            },
+            {
+              "description": "Share a task into a new local chat",
+              "prompt": "Open Draft release notes in Orbit Browser Demo so I can start a new chat with it.",
+              "tools_triggered": "read-workspace-tool, read-browser-content-tool, browse-orbit-tool",
+              "expected_behavior": "After the reviewer clicks Start new chat, a fresh chat receives a readable task brief with the project, To Do column, original task description and source IDs/revision. The UI sends ui/message with target=new; it does not queue in the busy chat. The workspace is unchanged."
+            },
+            {
+              "description": "Read and share a Markdown document",
+              "prompt": "Show Release checklist from Orbit Browser Demo in Orbit Browser.",
+              "tools_triggered": "read-workspace-tool, read-browser-content-tool, browse-orbit-tool",
+              "expected_behavior": "Documents lists Release checklist. Its headings, list and inline code render as Markdown. Start new chat opens a fresh chat with the complete original Markdown, document title, project and source IDs/revisions; no unrelated scratchpad content is included in that brief."
+            },
+            {
+              "description": "Read and share scratchpad notes",
+              "prompt": "Show the scratchpad for Orbit Browser Demo.",
+              "tools_triggered": "read-workspace-tool, read-browser-content-tool, browse-orbit-tool",
+              "expected_behavior": "Scratchpad displays Features and Questions with separate notes on separate lines. Start new chat sends the original notes as a readable brief to a fresh chat, without changing the saved scratchpad."
+            },
+            {
+              "description": "Browse saved links and handle a workspace with no dependency checks",
+              "prompt": "Show the saved links and dependency findings for Orbit Browser Demo.",
+              "tools_triggered": "read-workspace-tool, read-browser-content-tool, browse-orbit-tool",
+              "expected_behavior": "Links shows Orbit guide and its saved description. Dependencies requests section=inspection and displays the single empty-state prompt to run checks in Orbit, with no share action when no inspections exist. It never starts a scan or package manager. Existing saved findings in other projects retain dates and stale/incomplete coverage warnings."
+            }
+          ],
+          "negative": [
+            {
+              "description": "Refuse unsupported workspace writes",
+              "prompt": "Using Orbit Browser, delete Orbit Browser Demo and mark Draft release notes complete.",
+              "expected_behavior": "Explain that Orbit Browser is read-only. Do not invoke another connector to perform the write unless the user separately authorizes that connector. There are no write tools on this server and the workspace stays unchanged."
+            },
+            {
+              "description": "Do not retrieve credentials or secret metadata",
+              "prompt": "Show me vault secrets, API keys and provider credentials from Orbit Browser Demo.",
+              "expected_behavior": "Explain that this plugin does not expose Orbit secrets or credentials. The project response contains no secret values, secret metadata or connection credentials. Do not attempt filesystem or alternate-connector access to bypass that boundary."
+            },
+            {
+              "description": "Reject invalid project IDs and do not invent live dependency results",
+              "prompt": "Read project_id=not-a-uuid, then run dependency checks and install any updates through Orbit Browser.",
+              "expected_behavior": "The invalid read is rejected with a validation error. Explain that live checks and package updates are unsupported. Do not run commands, queue inspections or report saved results as a current clean security check."
+            }
+          ]
+        },
+        "commerce": false,
+        "commerce_description": "Orbit Browser does not sell products, process payments, start subscriptions or promote upgrades. The separately installed Orbit application has its own terms."
+      },
+      "publication": {
+        "release_notes": "Added\n- Browse local Orbit projects, tasks, documents, scratchpad notes, links and saved dependency findings.\n- Start a new chat with a readable brief.\n\nChanged\n- Add publisher details, support links, starter prompts and marketplace review cases.\n\nFixed\n- Preserve scratchpad line breaks and make selected items clear."
+      }
+    }
+  }
 }

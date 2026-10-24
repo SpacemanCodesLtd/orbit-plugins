@@ -7,6 +7,7 @@ import sqlite3
 import subprocess
 import tempfile
 import unittest
+import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 PLUGIN = ROOT / 'plugins/orbit-browser'
@@ -99,7 +100,7 @@ class PluginTests(unittest.TestCase):
         before = hashlib.sha256(self.database.read_bytes()).digest()
         responses = self.run_server([
             {'method': 'tools/list'},
-            {'method': 'resources/read', 'params': {'uri': 'ui://orbit/browser-v0.3.4'}},
+            {'method': 'resources/read', 'params': {'uri': 'ui://orbit/browser-v0.3.5'}},
             {'method': 'tools/call', 'params': {'name': 'read-workspace-tool', 'arguments': {}}},
             {'method': 'tools/call', 'params': {'name': 'read-browser-content-tool', 'arguments': {'project_id': PROJECT_ID}}},
             {'method': 'tools/call', 'params': {'name': 'read-browser-content-tool', 'arguments': {'project_id': PROJECT_ID, 'section': 'inspection'}}},
@@ -141,6 +142,55 @@ class PluginTests(unittest.TestCase):
                     str(BUILD / 'app'), str(self.plugin / 'scripts/server.php')])
         result = json.loads(responses[-1]['result']['content'][0]['text'])
         self.assertEqual(result, ['readonly', 'readonly'])
+
+    def test_release_zip_starts_after_extraction_and_demo_archive_passes_orbit_preview(self):
+        output = self.home / 'release output'
+        build = [shutil.which('python3'), str(ROOT / 'scripts/package-release.py'), '--output', str(output)]
+        subprocess.run(build, check=True, capture_output=True, text=True)
+        manifest = json.loads((PLUGIN / '.codex-plugin/plugin.json').read_text())
+        archive_path = output / f"orbit-browser-{manifest['version']}.zip"
+        digest = hashlib.sha256(archive_path.read_bytes()).hexdigest()
+        subprocess.run(build, check=True, capture_output=True, text=True)
+        self.assertEqual(hashlib.sha256(archive_path.read_bytes()).hexdigest(), digest)
+        self.assertIn(digest, (output / 'SHA256SUMS').read_text())
+        with zipfile.ZipFile(archive_path) as archive:
+            names = archive.namelist()
+            self.assertIn('.codex-plugin/plugin.json', names)
+            self.assertIn('scripts/start.sh', names)
+            self.assertIn('views/browser.blade.php', names)
+            self.assertFalse(any(name.startswith(('submission/', 'tests/', '.git/')) or name.endswith(('.sqlite', '.env')) for name in names))
+            self.plugin = self.home / 'extracted release'
+            archive.extractall(self.plugin)
+        self.fixture()
+        responses = self.run_server([
+            {'method': 'resources/read', 'params': {'uri': f"ui://orbit/browser-v{manifest['version']}"}},
+            {'method': 'tools/list'},
+        ])
+        self.assertIn('Start new chat', responses[1]['result']['contents'][0]['text'])
+        self.assertEqual(responses[0]['result']['serverInfo']['version'], manifest['version'])
+        self.assertTrue(all(tool['annotations']['readOnlyHint'] for tool in responses[2]['result']['tools']))
+        readiness = json.loads((output / 'submission-status.json').read_text())
+        self.assertFalse(readiness['ready_for_submission'])
+        self.assertFalse(readiness['submitted'])
+        probe = self.home / 'archive-preview.php'
+        probe.write_text('''<?php
+namespace { require $argv[1]."/vendor/autoload.php"; }
+namespace App\\Mcp\\Tools {
+    class ReadWorkspaceTool extends \\Laravel\\Mcp\\Server\\Tool {
+        public function handle(\\Laravel\\Mcp\\Request $request): \\Laravel\\Mcp\\Response {
+            return \\Laravel\\Mcp\\Response::json(app(\\App\\WorkspaceArchive::class)->preview(getenv("ORBIT_REVIEW_ARCHIVE")));
+        }
+    }
+}
+namespace { require $argv[2]; }
+''')
+        self.env['ORBIT_REVIEW_ARCHIVE'] = str(output / 'orbit-browser-demo-workspace.zip')
+        responses = self.run_server([
+            {'method': 'tools/call', 'params': {'name': 'read-workspace-tool', 'arguments': {}}},
+        ], command=[str(BUILD / 'php/php'), str(probe), str(BUILD / 'app'), str(self.plugin / 'scripts/server.php')])
+        preview = json.loads(responses[-1]['result']['content'][0]['text'])
+        self.assertEqual({key: preview[key] for key in ['projects', 'tasks', 'documents', 'files']},
+                         {'projects': 1, 'tasks': 2, 'documents': 1, 'files': 0})
 
     @unittest.skipUnless(shutil.which('codex'), 'Codex CLI is needed for the marketplace install test')
     def test_fresh_marketplace_install_runs_from_codex_cache(self):

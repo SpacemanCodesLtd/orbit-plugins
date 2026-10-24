@@ -59,3 +59,9 @@ python3 -m unittest discover -s tests -p 'test_*.py' -v
 Integration tests use a temporary workspace and a relocated copy of the plugin. They check protocol startup, rendered UI, safe Markdown, project and dependency reads, validation, missing-install errors, write-tool rejection, and SQLite write protection across reconnects. They never use your real workspace. Browser tests inspect the actual `ui/message` request, including the new-chat destination, parent acknowledgement, rejection, timeout and duplicate-click protection. Acknowledgement confirms the host accepted the request; it does not prove that a model has read it.
 
 Before publishing an update, run both suites, bump the plugin and server version, and change the UI resource URI when its HTML changes. Open a GitHub issue here for beta feedback; remove private project content before posting logs or screenshots.
+
+## Marketplace submission package
+
+Run `python3 scripts/package-release.py` to create the plugin upload ZIP, a synthetic Orbit demo-workspace archive, a separate submission kit, and SHA-256 checksums in `dist/`. See [submission/README.md](submission/README.md) for the review cases, legal drafts, recording script, validation and outstanding submission requirements.
+
+The ZIP is prepared for the approved local MCP submission route. It has not been uploaded, approved or published in the OpenAI directory. Final terms/privacy approval, public legal and video URLs, verified publishing identity and local MCP allowlisting remain required. The package depends on the separately installed Orbit app; confirm acceptance of this dependency with the review team.
