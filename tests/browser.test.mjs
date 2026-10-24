@@ -444,6 +444,51 @@ test('dependency failures clear the selection, can be retried, and late response
     assert.equal(current.contexts.at(-1).structuredContent.selection.kind, 'task');
 });
 
+test('dependencies without inspections show one empty state and cannot start an empty chat', async () => {
+    const current = mount();
+    await current.ready;
+    await current.click(current.get('projects').children[0]);
+    const call = current.app.callServerTool;
+    let inspection = [];
+    current.app.callServerTool = (params) => params.arguments.section === 'inspection'
+        ? Promise.resolve({ content: [{ type: 'text', text: JSON.stringify(inspection) }] }) : call(params);
+    for (const folders of [[], [{ path: '/project', package_roots: [] }]]) {
+        inspection = folders;
+        await current.click(current.get('refresh'));
+        await current.click(current.get('tab-dependencies'));
+        assert.equal(current.get('list-pane').hidden, true);
+        assert.equal(current.get('preview').hidden, true);
+        assert.equal(current.get('panes').className, 'panes reading');
+        assert.equal(current.get('content-empty').textContent, 'No saved dependency inspections. Run checks in Orbit to see results here.');
+        assert.equal(current.contexts.at(-1).structuredContent.selection, null);
+        assert.equal(current.get('share').disabled, true);
+        await current.click(current.get('share'));
+        assert.equal(current.messages.length, 0);
+    }
+    await current.click(current.get('tab-tasks'));
+    assert.equal(current.get('list-pane').hidden, false);
+    assert.equal(current.get('panes').className, 'panes');
+    assert.equal(current.get('share').disabled, false);
+});
+
+test('a saved dependency check with no findings remains readable and shareable', async () => {
+    const current = mount();
+    await current.ready;
+    await current.click(current.get('projects').children[0]);
+    const inspection = inspectionData();
+    const root = inspection[0].package_roots[0];
+    inspection[0].package_roots = [root];
+    root.outdated.packages = [];
+    root.security.packages = [];
+    current.app.callServerTool = async () => ({ content: [{ type: 'text', text: JSON.stringify(inspection) }] });
+    await current.click(current.get('tab-dependencies'));
+    assert.equal(current.get('list-pane').hidden, false);
+    assert.equal(current.get('share').disabled, false);
+    await current.click(current.get('share'));
+    assert.match(current.messages[0].content[0].text, /0 saved findings across 1 location/);
+    assert.match(current.messages[0].content[0].text, /Updates: saved/);
+});
+
 test('item search clears hidden selection and empty scratchpads stay unshareable', async () => {
     const current = mount();
     await current.ready;

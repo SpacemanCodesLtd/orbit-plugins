@@ -1,6 +1,6 @@
 {
   "name": "orbit-browser",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Browse and share local Orbit project context in Codex.",
   "requires_local_executor": true,
   "interface": {
