@@ -1,13 +1,13 @@
 # Orbit Browser submission kit
 
-Prepared 24 October 2026 for version 0.3.5. This is a preparation kit, not evidence of OpenAI approval or a submitted listing.
+Prepared 24 October 2026 for version 0.3.6. This is a preparation kit, not evidence of OpenAI approval or a submitted listing.
 
 ## Files
 
-- `orbit-browser-0.3.5.zip`: plugin upload. Its root contains `.codex-plugin/plugin.json`, `.mcp.json`, the runtime launcher, read-only tools, UI and icons.
+- `orbit-browser-0.3.6.zip`: plugin upload. Its root contains `.codex-plugin/plugin.json`, `.mcp.json`, the runtime launcher, read-only tools, UI and icons.
 - `orbit-browser-demo-workspace.zip`: synthetic Orbit workspace for reviewer setup and recording. Import through Orbit Settings → Data → Import. It adds one project; importing twice adds duplicates. Use a separate review installation/workspace and leave preference import off. It contains no credentials, local folders, files or private data.
 - `listing-copy.md`: text generated from the shipped manifest.
-- `terms-draft.md` and `privacy-draft.md`: reference copies of the published legal copy. The pages match the website changes in [website PR #1](https://github.com/captenmasin/orbit-marketing/pull/1). The owner confirmed inbox-only support, retention for 12 months after resolution, and company-number/registry-link disclosure without a public postal address. The terms and privacy pages are live; the receiving mailbox provider and relevant transfer arrangements still need confirmation.
+- `terms-draft.md` and `privacy-draft.md`: archived reference copies of the plugin legal copy from the website changes in [website PR #1](https://github.com/captenmasin/orbit-marketing/pull/1). The owner confirmed inbox-only support, retention for 12 months after resolution, and company-number/registry-link disclosure without a public postal address. The plugin terms page and plugin-specific privacy disclosures were removed from the marketing site in [website PR #2](https://github.com/captenmasin/orbit-marketing/pull/2) while submission access is pending. Restore them before resuming submission; the receiving mailbox provider and relevant transfer arrangements still need confirmation.
 - `walkthrough.md`: recording and reviewer run sheet.
 - `submission-status.json`: outstanding submission items.
 - `SHA256SUMS`: checksums of the plugin, workspace and complete kit ZIPs, provided beside the ZIPs.
@@ -32,8 +32,8 @@ Orbit Browser is a local stdio MCP plugin. It needs a local Codex chat on the sa
 
 1. Confirm the submitting organisation has approved-partner local MCP access. Send its organisation ID to your OpenAI representative and wait for allowlisting confirmation. Do not put the organisation ID or private access details in this public kit.
 2. Complete developer/business identity verification and confirm owner or Apps Management Write access. The suggested publisher, **SpacemanCodes LTD**, follows Orbit's public website; select the matching verified identity. The portal controls the final displayed developer identity.
-3. The [terms](https://orbitdesktop.com/terms/) and [privacy page](https://orbitdesktop.com/privacy/) are live following [website PR #1](https://github.com/captenmasin/orbit-marketing/pull/1), and both URLs are included in the manifest. The receiving mailbox provider and relevant transfer arrangements remain unconfirmed. [GOV.UK guidance](https://www.gov.uk/running-a-limited-company/signs-stationery-and-promotional-material) requires the registered office address and registration jurisdiction on a limited-company website; the owner requested no public postal address, so that disclosure issue remains unresolved.
-4. The [supplied recording](https://media.orbitdesktop.com/orbit-browser-demo-2026-10-24.mp4) is hosted on Orbit's public R2 media domain and included as `extensions.com.openai.review.demo_recording_url`. It is a 31-second clip recorded with the installed 0.3.4 beta. Review it against all cases and capture any missing workflows on the 0.3.5 candidate before final submission; full recording coverage has not been signed off.
+3. Restore the [plugin terms](https://orbitdesktop.com/terms/) and plugin-specific disclosures in the [privacy page](https://orbitdesktop.com/privacy/) before resuming submission. The Git-backed beta links to its repository privacy information and omits the unavailable terms URL. Restore the dedicated legal URLs in the manifest for public directory submission; [website PR #2](https://github.com/captenmasin/orbit-marketing/pull/2) removed the public plugin copy while submission access is pending. The receiving mailbox provider and relevant transfer arrangements remain unconfirmed. [GOV.UK guidance](https://www.gov.uk/running-a-limited-company/signs-stationery-and-promotional-material) requires the registered office address and registration jurisdiction on a limited-company website; the owner requested no public postal address, so that disclosure issue remains unresolved.
+4. The [supplied recording](https://media.orbitdesktop.com/orbit-browser-demo-2026-10-24.mp4) is hosted on Orbit's public R2 media domain and included as `extensions.com.openai.review.demo_recording_url`. It is a 31-second clip recorded with the installed 0.3.4 beta. Review it against all cases and capture any missing workflows on the 0.3.6 candidate before final submission; full recording coverage has not been signed off.
 5. Follow the desktop-only flow in the submission portal: **Create plugin → Skills only → Upload ZIP**. Despite the label, this is the documented route for approved local MCP submissions. Choose the verified identity and inspect all imported metadata. No skills are required for this local MCP package.
 6. Resolve automated findings. The manifest contains exactly five positive and three negative review cases. Run them on the review setup and sign off in `walkthrough.md`. Do not represent automated protocol tests as native desktop UI evidence.
 7. Add reviewer setup/access information through the portal's secure Review details form. No Orbit account sign-in or reviewer password is needed for this local plugin; the reviewer needs Orbit installed, sample local data and a local Codex chat. If the portal requires an account credential, ask OpenAI how to record this desktop setup rather than supplying a fabricated account.
@@ -49,14 +49,14 @@ The plugin opens SQLite read-only, keeps reconnects read-only, excludes secret m
 
 ## Review status and outstanding work
 
-- [x] Publisher name, email, product/support/privacy URLs and starter prompts prepared.
+- [x] Publisher name, email, product/support URLs, beta privacy information and starter prompts prepared.
 - [x] Plugin, server and UI resource versions match; package uses existing supported Codex manifest format.
 - [x] Five positive and three negative cases are embedded in the manifest.
 - [x] Square 60 × 60 SVG light/dark icons are included.
 - [x] Importable synthetic sample project and recording script prepared.
 - [ ] Confirm local MCP allowlisting, verified identity and installed Orbit dependency eligibility.
 - [x] Prepare website legal pages with the owner-confirmed support retention and company disclosure choices.
-- [x] Publish the legal pages and include their live URLs in the rebuilt package.
+- [ ] Restore the plugin legal pages and verify the candidate manifest URLs before resuming submission.
 - [ ] Resolve mailbox-provider/transfer arrangements and company-address disclosure.
 - [x] Host the supplied recording, add its URL to the manifest and rebuild.
 - [ ] Review recording coverage and capture missing workflows on the submission candidate.

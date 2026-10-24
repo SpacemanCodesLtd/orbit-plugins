@@ -100,7 +100,7 @@ class PluginTests(unittest.TestCase):
         before = hashlib.sha256(self.database.read_bytes()).digest()
         responses = self.run_server([
             {'method': 'tools/list'},
-            {'method': 'resources/read', 'params': {'uri': 'ui://orbit/browser-v0.3.5'}},
+            {'method': 'resources/read', 'params': {'uri': 'ui://orbit/browser-v0.3.6'}},
             {'method': 'tools/call', 'params': {'name': 'read-workspace-tool', 'arguments': {}}},
             {'method': 'tools/call', 'params': {'name': 'read-browser-content-tool', 'arguments': {'project_id': PROJECT_ID}}},
             {'method': 'tools/call', 'params': {'name': 'read-browser-content-tool', 'arguments': {'project_id': PROJECT_ID, 'section': 'inspection'}}},
@@ -203,6 +203,9 @@ namespace { require $argv[2]; }
         ]:
             result = subprocess.run(command, env=self.env, text=True, capture_output=True, timeout=30)
             self.assertEqual(result.returncode, 0, result.stderr)
+        installed_manifest = json.loads(result.stdout)
+        manifest = json.loads((PLUGIN / '.codex-plugin/plugin.json').read_text())
+        self.assertEqual(installed_manifest['version'], manifest['version'])
         servers = json.loads(subprocess.check_output(['codex', 'mcp', 'list', '--json'], env=self.env))
         transport = next(s['transport'] for s in servers if s['name'] == 'orbit-browser')
         installed = Path(transport['cwd']).resolve()

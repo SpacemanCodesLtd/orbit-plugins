@@ -2,6 +2,8 @@
 
 The Git-backed beta marketplace for Orbit's local Codex plugins.
 
+The current beta is **Orbit Browser 0.3.6**. Public directory submission is pending OpenAI's confirmation of local MCP eligibility; you can install this beta directly from Git now.
+
 ## Install Orbit Browser
 
 Requires macOS, the Codex desktop app with local plugin support, and an installed copy of Orbit. Tested with Orbit 0.5.1. Open Orbit at least once and create a workspace before connecting. No Orbit source checkout, Composer, Node.js or separate PHP installation is needed to use the plugin.
@@ -16,6 +18,8 @@ codex plugin add orbit-browser@orbit-beta
 Restart Codex, then find **Orbit Browser** under the **Orbit Beta** marketplace in Plugins. Open its app, or ask Codex to browse your Orbit projects. It runs in local chats on the same Mac as Orbit.
 
 Orbit Browser includes tasks, scratchpad, documents, links, and saved dependency update/security findings. Dependency results come from the last checks saved in Orbit; run checks in Orbit to refresh them.
+
+Choose a project, open a task, document or scratchpad, then click **Start new chat** yourself to send a readable brief to a fresh conversation. Automated clicks show a manual-click instruction. [Watch a short demo](https://media.orbitdesktop.com/orbit-browser-demo-2026-10-24.mp4).
 
 ## Data and permissions
 
@@ -64,4 +68,4 @@ Before publishing an update, run both suites, bump the plugin and server version
 
 Run `python3 scripts/package-release.py` to create the plugin upload ZIP, a synthetic Orbit demo-workspace archive, a separate submission kit, and SHA-256 checksums in `dist/`. See [submission/README.md](submission/README.md) for the review cases, legal drafts, recording script, validation and outstanding submission requirements.
 
-The ZIP is prepared for the approved local MCP submission route. It has not been uploaded, approved or published in the OpenAI directory. Final terms/privacy approval, public legal and video URLs, verified publishing identity and local MCP allowlisting remain required. The package depends on the separately installed Orbit app; confirm acceptance of this dependency with the review team.
+Public directory review is paused at the local MCP eligibility gate; this Git-backed beta is available independently. The submission kit records the remaining work: restore dedicated plugin legal pages, complete recording and reviewer-case sign-off, and confirm verified publishing identity, local MCP allowlisting and acceptance of the installed Orbit dependency. Beta privacy information is in the [plugin README](plugins/orbit-browser/README.md#data-and-privacy).
