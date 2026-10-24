@@ -99,7 +99,7 @@ class PluginTests(unittest.TestCase):
         before = hashlib.sha256(self.database.read_bytes()).digest()
         responses = self.run_server([
             {'method': 'tools/list'},
-            {'method': 'resources/read', 'params': {'uri': 'ui://orbit/browser-v0.3.1'}},
+            {'method': 'resources/read', 'params': {'uri': 'ui://orbit/browser-v0.3.2'}},
             {'method': 'tools/call', 'params': {'name': 'read-workspace-tool', 'arguments': {}}},
             {'method': 'tools/call', 'params': {'name': 'read-browser-content-tool', 'arguments': {'project_id': PROJECT_ID}}},
             {'method': 'tools/call', 'params': {'name': 'read-browser-content-tool', 'arguments': {'project_id': PROJECT_ID, 'section': 'inspection'}}},
