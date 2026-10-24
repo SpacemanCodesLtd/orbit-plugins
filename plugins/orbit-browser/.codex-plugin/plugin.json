@@ -1,6 +1,6 @@
 {
   "name": "orbit-browser",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Browse and share local Orbit project context in Codex.",
   "requires_local_executor": true,
   "interface": {
@@ -18,8 +18,7 @@
     "logoDark": "./assets/icon-dark.svg",
     "websiteURL": "https://orbitdesktop.com",
     "supportURL": "https://orbitdesktop.com/contact/",
-    "privacyPolicyURL": "https://orbitdesktop.com/privacy/",
-    "termsOfServiceURL": "https://orbitdesktop.com/terms/",
+    "privacyPolicyURL": "https://github.com/captenmasin/orbit-plugins/blob/main/plugins/orbit-browser/README.md#data-and-privacy",
     "defaultPrompt": [
       "Browse my Orbit projects.",
       "Show the tasks and notes for an Orbit project.",
@@ -100,7 +99,7 @@
         "commerce_description": "Orbit Browser does not sell products, process payments, start subscriptions or promote upgrades. The separately installed Orbit application has its own terms."
       },
       "publication": {
-        "release_notes": "Added\n- Browse local Orbit projects, tasks, documents, scratchpad notes, links and saved dependency findings.\n- Start a new chat with a readable brief.\n\nChanged\n- Add publisher details, support links, starter prompts and marketplace review cases.\n\nFixed\n- Preserve scratchpad line breaks and make selected items clear."
+        "release_notes": "Changed\n- Refresh the Git-backed beta with the latest project browser and readable chat briefs.\n- Publish plugin privacy information with the beta installation instructions.\n\nFixed\n- Explain when starting a chat needs a manual click."
       }
     }
   }
